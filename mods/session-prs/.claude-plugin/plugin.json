@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "session-prs",
+  "version": "0.6.1",
+  "description": "Side pane listing PRs this session opened, changed, reviewed or tracked, with live status",
+  "author": {
+    "name": "Maciej Kucharek",
+    "email": "qchcio@gmail.com"
+  },
+  "types": "./types/index.d.ts",
+  "license": "MIT"
+}

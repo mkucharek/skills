@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mkucharek",
+  "description": "Maciej Kucharek's Claude Code plugins",
+  "owner": { "name": "Maciej Kucharek" },
+  "plugins": [
+    {
+      "name": "session-prs",
+      "description": "Side pane listing PRs the current session opened, changed, reviewed or tracked, with live status",
+      "source": "./mods/session-prs"
+    }
+  ]
+}
