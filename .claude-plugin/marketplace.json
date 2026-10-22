@@ -2,12 +2,19 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "mkucharek",
   "description": "Maciej Kucharek's Claude Code plugins",
-  "owner": { "name": "Maciej Kucharek" },
+  "owner": {
+    "name": "Maciej Kucharek"
+  },
   "plugins": [
     {
       "name": "session-prs",
       "description": "Side pane listing PRs the current session opened, changed, reviewed or tracked, with live status",
       "source": "./mods/session-prs"
+    },
+    {
+      "name": "writing",
+      "description": "Writing skills for three readers: non-engineers, engineers and agents",
+      "source": "./plugins/writing"
     }
   ]
 }
