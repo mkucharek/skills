@@ -22,6 +22,10 @@ export type Pr = {
   review?: string
   ci?: Ci
   checkedAt?: number
+  // A 1-2 sentence summary of what the PR does, and a hash of the title,
+  // body and files it was written from, so an edited PR is summarized again.
+  summary?: string
+  summaryOf?: string
   // Absent on PRs tracked before activities were recorded: those were opened.
   activities?: Activity[]
 }

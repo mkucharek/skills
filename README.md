@@ -40,6 +40,10 @@ PRs the session only reads (`gh pr view`, `diff`, `checks`) stay out unless the 
 
 Sections: Ready for review and Drafts (open), Merged and Closed (collapsed), each shown only when it holds a PR. Each row shows the link, title, review decision and checks (pass, running, or failing with links to the failing runs), refreshed through `gh pr view` every 2 minutes.
 
+Under each title is a 1-2 sentence summary of what the PR does. Haiku writes it from the title, description and changed files, and writes it again when any of those change; a push that only adds lines to files already listed does not trigger a rewrite. To turn summaries off, set **PR summaries** to off in `/config`.
+
+Linear ticket keys such as `ENG-123` in titles and summaries link to Linear once you set **Linear workspace** in `/config` to your workspace's URL slug (the `acme` in `linear.app/acme`).
+
 `/session-prs` opens the pane. It also takes `add <url>`, `remove <url|#n>`, `refresh` and `clear`. A PR you remove stays out until the session opens it or you add it again.
 
 ## writing

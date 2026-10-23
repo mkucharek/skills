@@ -32,6 +32,19 @@ const SECTIONS: { key: SectionKey; title: string }[] = [
   { key: 'merged', title: 'Merged' },
   { key: 'closed', title: 'Closed' },
 ]
+// A Linear key is a team key, a dash and a number; the prefixes of common
+// tokens shaped like one (UTF-8, SHA-256) stay text.
+const TICKET = /\b([A-Z][A-Z0-9]{1,6})-(\d+)\b/g
+const NOT_TICKETS = new Set(['UTF', 'SHA', 'ISO', 'RFC', 'CVE', 'GPT', 'TLS', 'HTTP', 'COVID'])
+const SUMMARY_MODEL = 'haiku'
+const MAX_BODY = 4000
+const MAX_FILES = 40
+const SUMMARY_SYSTEM =
+  'You summarize GitHub pull requests for someone skimming a list of them. Reply with one or two plain sentences, at most 40 words, saying what the PR changes and why. No markdown, no preamble, and do not restate the title.'
+
+let config = { linearWorkspace: '', summaries: true }
+// PRs with a summary request in flight, so a refresh does not ask twice.
+const summarizing = new Set<string>()
 
 const prs = atom({ plugin: 'session-prs', key: 'prs' } as const, [])
 const dismissed = atom({ plugin: 'session-prs', key: 'dismissed' } as const, [])
@@ -71,6 +84,46 @@ export function summarizeChecks(rollup: readonly RollupItem[]): Ci {
   }
   const state = rollup.length === 0 ? 'none' : failing.length > 0 ? 'fail' : running > 0 ? 'running' : 'pass'
   return { state, total: rollup.length, running, failing }
+}
+
+// Text split around Linear ticket keys, each key its own piece.
+export function ticketPieces(text: string): (string | { key: string })[] {
+  const out: (string | { key: string })[] = []
+  let last = 0
+  for (const m of text.matchAll(TICKET)) {
+    if (NOT_TICKETS.has(m[1] ?? '')) continue
+    if (m.index > last) out.push(text.slice(last, m.index))
+    out.push({ key: m[0] })
+    last = m.index + m[0].length
+  }
+  if (last < text.length) out.push(text.slice(last))
+  return out
+}
+
+type File = { path: string; additions?: number; deletions?: number }
+
+// What a summary is written from, and the hash that says when to write it
+// again: line counts are left out of the hash so a push that only grows the
+// diff keeps the summary.
+export function summarySource(title: string, body: string, files: readonly File[]): { prompt: string; hash: string } {
+  const listed = files.slice(0, MAX_FILES).map(f => `${f.path} (+${f.additions ?? 0} -${f.deletions ?? 0})`)
+  if (files.length > MAX_FILES) listed.push(`…and ${files.length - MAX_FILES} more`)
+  const prompt = `Title: ${title}\n\nDescription:\n${body.slice(0, MAX_BODY).trim() || '(none)'}\n\nChanged files:\n${listed.join('\n') || '(none)'}`
+  let h = 5381
+  for (const c of [title, body, ...files.map(f => f.path)].join('\n')) h = ((h << 5) + h + c.charCodeAt(0)) | 0
+  return { prompt, hash: (h >>> 0).toString(36) }
+}
+
+async function summarize($: EngineInterface, url: string, prompt: string, hash: string) {
+  summarizing.add(url)
+  try {
+    const r = await $.model.complete({ model: SUMMARY_MODEL, system: SUMMARY_SYSTEM, prompt, maxTokens: 200, timeoutMs: 30_000 })
+    if (!r.isAnswered) return
+    const summary = r.text.replace(/\s+/g, ' ').trim()
+    if (summary) await update($, prs, l => l.map(p => (p.url === url ? { ...p, summary, summaryOf: hash } : p)))
+  } finally {
+    summarizing.delete(url)
+  }
 }
 
 // What the session did to a PR, strongest first; "related" only when it did
@@ -278,13 +331,19 @@ async function refresh($: EngineInterface) {
     open.map(async p => {
       try {
         const { exitCode, stdout } = await $.process.run(
-          ['gh', 'pr', 'view', p.url, '--json', 'title,state,isDraft,reviewDecision,statusCheckRollup'],
+          ['gh', 'pr', 'view', p.url, '--json', 'title,state,isDraft,reviewDecision,statusCheckRollup,body,files'],
           { timeoutMs: 20_000 },
         )
         if (exitCode !== 0) return undefined
         const j = JSON.parse(stdout)
-        const next: Pr = {
-          ...p,
+        if (config.summaries && !summarizing.has(p.url)) {
+          const { prompt, hash } = summarySource(j.title ?? '', j.body ?? '', j.files ?? [])
+          if (hash !== p.summaryOf) void summarize($, p.url, prompt, hash).catch(() => undefined)
+        }
+        // Only what gh reports, laid over the PR as it stands when written:
+        // a summary or activity added meanwhile is kept.
+        const next = {
+          url: p.url,
           title: j.title,
           state: j.state,
           isDraft: j.isDraft,
@@ -298,11 +357,16 @@ async function refresh($: EngineInterface) {
       }
     }),
   )
-  const byUrl = new Map(results.filter((r): r is Pr => !!r).map(r => [r.url, r]))
-  if (byUrl.size > 0) await update($, prs, l => l.map(p => byUrl.get(p.url) ?? p))
+  const byUrl = new Map(results.filter(r => !!r).map(r => [r.url, r]))
+  if (byUrl.size > 0) await update($, prs, l => l.map(p => ({ ...p, ...byUrl.get(p.url) })))
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  config = {
+    linearWorkspace: String(options.linearWorkspace ?? '').trim(),
+    summaries: options.summaries !== false,
+  }
+
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'session-prs',
@@ -393,6 +457,13 @@ export const register: Register = on => {
     const dot = (p: Pr) =>
       p.state === 'MERGED' ? 'magenta' : p.state === 'CLOSED' ? 'gray' : p.isDraft ? 'yellow' : 'green'
 
+    const linked = (text: string) =>
+      config.linearWorkspace
+        ? ticketPieces(text).map(t =>
+            typeof t === 'string' ? t : <Link href={`https://linear.app/${config.linearWorkspace}/issue/${t.key}`} label={t.key} />,
+          )
+        : text
+
     const checks = (ci: Ci) => {
       if (ci.state === 'none') return <Text dimColor>no checks</Text>
       if (ci.state === 'pass') return <Text color="green">✓ checks pass ({ci.total})</Text>
@@ -423,7 +494,8 @@ export const register: Register = on => {
           {activityLabel(p) && <Text color="cyan"> · {activityLabel(p)}</Text>}
           {p.review && <Text dimColor> · {p.review.toLowerCase().replace(/_/g, ' ')}</Text>}
         </Text>
-        {p.title && <Text wrap="truncate-end">{p.title}</Text>}
+        {p.title && <Text wrap="truncate-end">{linked(p.title)}</Text>}
+        {config.summaries && p.summary && <Text dimColor>{linked(p.summary)}</Text>}
         {p.state === 'OPEN' && p.ci && checks(p.ci)}
       </Box>
     )

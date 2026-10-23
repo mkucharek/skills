@@ -1,8 +1,22 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "session-prs",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Side pane listing PRs this session opened, changed, reviewed or tracked, with live status",
+  "userConfig": {
+    "linearWorkspace": {
+      "type": "string",
+      "title": "Linear workspace",
+      "description": "Your Linear workspace's URL slug (linear.app/<slug>). Set it to make ticket keys like ENG-123 in titles and summaries link to Linear; empty leaves them as text.",
+      "default": ""
+    },
+    "summaries": {
+      "type": "boolean",
+      "title": "PR summaries",
+      "description": "Show a 1-2 sentence summary under each PR, written by Haiku from the PR's title, description and changed files.",
+      "default": true
+    }
+  },
   "author": {
     "name": "Maciej Kucharek",
     "email": "qchcio@gmail.com"
