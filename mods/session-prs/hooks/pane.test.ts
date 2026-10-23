@@ -59,3 +59,45 @@ test('pane shows only filled sections, opens ready + drafts, toggles on press', 
     await ui.unmount()
   }
 })
+
+test('links Linear keys and shows a summary written once per PR version', { options: { linearWorkspace: 'acme' } }, async ($, on) => {
+  let asked = 0
+  let body = 'Adds retries.'
+  on('ui.open', async () => ({ value: { isPlaced: true } }))
+  on('tool.call', { tool: 'Bash' }, async () => ({
+    result: { stdout: '', stderr: '', interrupted: false },
+    text: 'https://github.com/o/r/pull/9',
+  }))
+  on('process.run', async () => {
+    const view = { title: 'ENG-123 Retry uploads', state: 'OPEN', isDraft: false, statusCheckRollup: [], body, files: [{ path: 'up.ts', additions: 3, deletions: 1 }] }
+    return { value: { exitCode: 0, stdout: JSON.stringify(view), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+  })
+  on('model.complete', async (_$, e) => {
+    asked++
+    expect(e.prompt).toContain(body)
+    const usage = { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }
+    return { value: { isAnswered: true, text: ` Retries failed uploads (ENG-123)\n twice. `, usage } }
+  })
+  await $.tool.call({ tool: 'Bash', command: 'gh pr create --title x' })
+  const refresh = () => $.command.run({ ...REFRESH, command: 'session-prs', args: 'refresh' })
+  await refresh()
+  await refresh()
+  expect(asked).toBe(1)
+
+  const ui = await $.ui.mount({
+    plugin: 'session-prs',
+    surface: 'terminal',
+    component: 'Pane',
+    requestId: 'session-prs',
+    props: { ...PANE_PROPS, title: 'Session PRs', isFocused: false, bodyColumns: 40 },
+  })
+  expect(await ui.find({ type: 'Text', text: /Retries failed uploads \(ENG-123\) twice\./ })).toBeDefined()
+  const link = await ui.find({ type: 'Link', text: 'ENG-123' })
+  expect(link?.props.href).toBe('https://linear.app/acme/issue/ENG-123')
+  await ui.unmount()
+
+  body = 'Adds retries with backoff.'
+  await refresh()
+  await refresh()
+  expect(asked).toBe(2)
+})
