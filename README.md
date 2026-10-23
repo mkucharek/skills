@@ -5,6 +5,7 @@ Claude Code plugins I use day to day.
 | Plugin | What it does |
 | --- | --- |
 | [`session-prs`](mods/session-prs) | Mod: a side pane listing the pull requests the current session works on, with live review and CI status. |
+| [`writing`](plugins/writing) | Skills for writing to three readers: `writing-for-humans`, `writing-for-engineers` and `writing-for-agents`. |
 
 ## Install
 
@@ -12,17 +13,19 @@ At the prompt of a Claude Code terminal session:
 
 ```
 /plugin install session-prs --marketplace mkucharek/skills
+/plugin install writing --marketplace mkucharek/skills
 ```
 
 Answer `y` to add the marketplace, then pick a scope. From a shell:
 
 ```sh
 claude plugin install session-prs --marketplace mkucharek/skills
+claude plugin install writing --marketplace mkucharek/skills
 ```
 
 In the desktop app, where `/plugin` does not run: click + next to the prompt box, then Plugins, Add marketplace with `mkucharek/skills`, then Add plugin.
 
-The mod calls the GitHub CLI, so `gh` must be installed and signed in (`gh auth login`).
+`session-prs` calls the GitHub CLI, so `gh` must be installed and signed in (`gh auth login`).
 
 ## session-prs
 
@@ -39,6 +42,18 @@ Sections: Ready for review and Drafts (open), Merged and Closed (collapsed), eac
 
 `/session-prs` opens the pane. It also takes `add <url>`, `remove <url|#n>`, `refresh` and `clear`. A PR you remove stays out until the session opens it or you add it again.
 
+## writing
+
+Three skills, one per reader. Each points to the others when the reader is not its own.
+
+| Skill | Use it for |
+| --- | --- |
+| [`writing-for-humans`](plugins/writing/skills/writing-for-humans/SKILL.md) | Email, Slack, announcements, status updates, posts and other text for a non-engineering reader. Scrubs the signs of AI writing, using a tell catalog based on Wikipedia's *Signs of AI writing* and Tim Harris's skills. |
+| [`writing-for-engineers`](plugins/writing/skills/writing-for-engineers/SKILL.md) | Architecture docs, runbooks, decision records and write-ups, in STE-lite: about 80% of ASD-STE100. `scripts/prose_check.py <file>` checks sentence and paragraph lengths. |
+| [`writing-for-agents`](plugins/writing/skills/writing-for-agents/SKILL.md) | `SKILL.md`, `CLAUDE.md`, `AGENTS.md` and rules files: writing them so agents follow them, and pruning them. Matt Pocock's skill with additions from Tim Harris. |
+
+The agent picks a skill from what you ask for, or you name it: `/writing:writing-for-humans`.
+
 ## Develop
 
 ```sh
@@ -50,4 +65,4 @@ Bump `version` in `mods/session-prs/.claude-plugin/plugin.json` with each change
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). Parts adapted from other MIT projects keep their own notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

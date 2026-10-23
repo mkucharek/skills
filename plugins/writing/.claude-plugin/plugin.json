@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "writing",
+  "version": "1.0.0",
+  "description": "Writing skills: writing-for-humans (email, Slack, announcements, updates), writing-for-engineers (technical docs, with a sentence-length checker) and writing-for-agents (SKILL.md, CLAUDE.md, AGENTS.md)",
+  "author": {
+    "name": "Maciej Kucharek"
+  },
+  "license": "MIT"
+}
