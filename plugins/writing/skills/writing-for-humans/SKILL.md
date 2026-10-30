@@ -7,7 +7,7 @@ description: "Write or revise outgoing communication for a non-engineering reade
 
 The reader is a person with other things to do. They decide in the first two lines whether to keep reading, and they notice when text sounds machine-made. Write so that a busy person gets the point at once, and so that the text sounds like a specific person wrote it.
 
-For technical docs an engineer reads, use `writing:writing-for-engineers`. For documents an agent reads, use `writing:writing-for-agents`.
+For technical docs an engineer reads, use the `writing-for-engineers` skill when available. For documents an agent reads, use `writing-for-agents` when available. Resolve these names through the host's skill list; plugin installs may add a namespace.
 
 ## 1. Before writing
 

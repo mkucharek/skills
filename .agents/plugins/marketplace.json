@@ -1,0 +1,20 @@
+{
+  "name": "mkucharek",
+  "interface": {
+    "displayName": "Maciej Kucharek's skills"
+  },
+  "plugins": [
+    {
+      "name": "writing",
+      "source": {
+        "source": "local",
+        "path": "./plugins/writing"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
