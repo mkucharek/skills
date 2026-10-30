@@ -96,4 +96,4 @@ Separate thoughts with periods, commas, and colons. The em dash is a top AI tell
 
 ## Attribution
 
-Body and `SKILL-MECHANICS.md`: Matt Pocock's [`writing-for-agents`](https://github.com/mattpocock/skills/tree/321658273cb1d20b76026717d027d505790106d4/skills/productivity/writing-for-agents) (MIT), unchanged except the no-op fix in Pruning. The `description`, the Punctuation rule, and the Done-when list come from Tim Harris's [adaptation](https://github.com/timharris707/skills/tree/0b04f1c02c7a962588ac5d2aa68bd0cbd03a2cc0/skills/author/writing-for-agents) (MIT).
+Body and `SKILL-MECHANICS.md`: adapted from Matt Pocock's [`writing-for-agents`](https://github.com/mattpocock/skills/tree/321658273cb1d20b76026717d027d505790106d4/skills/productivity/writing-for-agents) (MIT), with the no-op fix in Pruning and invocation guidance for multiple hosts. The `description`, the Punctuation rule, and the Done-when list come from Tim Harris's [adaptation](https://github.com/timharris707/skills/tree/0b04f1c02c7a962588ac5d2aa68bd0cbd03a2cc0/skills/author/writing-for-agents) (MIT).

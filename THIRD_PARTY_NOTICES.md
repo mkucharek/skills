@@ -4,7 +4,7 @@ Parts of this repo come from the MIT-licensed projects below. Each section names
 
 ## mattpocock/skills
 
-Source: <https://github.com/mattpocock/skills>. Used in `plugins/writing/skills/writing-for-agents`: the `SKILL.md` body and `SKILL-MECHANICS.md`, unchanged.
+Source: <https://github.com/mattpocock/skills>. Adapted in `plugins/writing/skills/writing-for-agents`: the `SKILL.md` body and `SKILL-MECHANICS.md`, with the no-op fix in Pruning and invocation guidance for multiple hosts.
 
 ```text
 MIT License

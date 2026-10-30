@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "writing",
+  "version": "1.1.0",
+  "description": "Writing skills for non-engineering readers, engineers and agents",
+  "author": {
+    "name": "Maciej Kucharek"
+  },
+  "repository": "https://github.com/mkucharek/skills",
+  "license": "MIT"
+}
