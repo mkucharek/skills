@@ -1,0 +1,25 @@
+plugins/writing/skills/writing-for-agents/SKILL-MECHANICS.md
+  s_acdc307fc6981c::t_18b538b48f5672 3-9,13,15-16,18,20-28,32-34,38
+plugins/writing/skills/writing-for-agents/agents/openai.yaml
+  s_acdc307fc6981c::t_9e38da9252bfaf 1-3
+plugins/writing/skills/writing-for-engineers/agents/openai.yaml
+  s_acdc307fc6981c::t_8fde3aa053d381 1-3
+plugins/writing/skills/writing-for-humans/agents/openai.yaml
+  s_acdc307fc6981c::t_086612ac9953fa 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e72af4a30236f5b7667e2bb9f00a16e401eb3da8",
+  "prompts": {},
+  "sessions": {
+    "s_acdc307fc6981c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18e00-0728-7f71-9a1f-c001954bc651",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Maciej Kucharek <qchcio@gmail.com>"
+    }
+  }
+}
